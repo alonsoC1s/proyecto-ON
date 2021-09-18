@@ -6,7 +6,13 @@ Funciones de apoyo para implementar el algoritmo principal.
 	rankMethod(G, A, c, b)
 
 Implementación del método de rango para resolver problemas de programación cuadrática 
-(PPC) con solamente restricciones de igualdad.
+(PPC) con restricciones ``Ax = b``.
+
+# Arguments
+- `G::Matriz{Float64}(n, n)`: Matriz de la definición del problema cuadrático.
+- `A::Matrix{Float64}(m, n)`: La matriz de restricciones.
+- `c::Vector{Float64}(n)`: Vector de costos de la funciób objetivo.
+- `b::Vector{Float64}(n)`: Vector de constantes de las restricciones
 """
 function rankMethod(G, A, c, b)
 	
@@ -18,7 +24,8 @@ function rankMethod(G, A, c, b)
 	λ = (AGinv * A') \ (-b - AGinv * c)
 
 	# Calculando x_* con (2.3)
-	x_star = -inv(G) * c - inv(G) * A' * λ
+	Ginv
+	x_star = (-Ginv * c) - (Ginv * A' * λ)
 	
 	return x_star
 end
