@@ -24,7 +24,7 @@ function rankMethod(G, A, c, b)
 	λ = (AGinv * A') \ (-b - AGinv * c)
 
 	# Calculando x_* con (2.3)
-	Ginv
+	Ginv= inv(G)
 	x_star = (-Ginv * c) - (Ginv * A' * λ)
 	
 	return x_star
