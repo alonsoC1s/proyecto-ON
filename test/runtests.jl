@@ -1,8 +1,9 @@
 using Test
 
 include("../funciones.jl")
+include("../main.jl")
 
-using .Utils
+using .Utils, LinearAlgebra
 
 @testset "Utilities básicas" begin
 	# Testeando método del rango
@@ -42,6 +43,25 @@ using .Utils
 	# Punto sobre el hiperplano
 	@test 𝒜(A, b, [1, 1, 1]) == [1, 0, 0, 0]
 	@test 𝒜(A, b, [0, 0, 0]) == [0, 1, 1, 1]
+
+	# Testeando conjunto activo
+	A = [1 1 1;
+	-1 0 0;
+	0 -1 0;
+	0 0 -1]
+
+	b = [3, 0, 0, 0]
+
+	A_E = A[1, :]'
+	b_E = b[1]
+	A_I = A[2:end, :]
+	b_I = b[2:end]
+
+	G = I(3)
+
+	c = [-1, -1, -1]
+
+	@test activeSetMethod(G, c, A_E, b_E, A_I, b_I) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
 
 
 end 
