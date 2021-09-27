@@ -5,21 +5,27 @@ include("../main.jl")
 
 using .Utils, LinearAlgebra
 
-@testset "Utilities básicas" begin
+@testset "Funciones auxiliares paa resolver el método de conjunto activo" begin
 	# Testeando método del rango
     G = [2 1 0 0;
 		 1 2 0 0;
 		 0 0 4 2;
 		 0 0 2 2]
 
-    A = [1 1 0 0; 0 1 1 0]
+    A = [1 1 0 0; 
+		 0 1 1 0]
+
 	b = [2, 1]
 	c = [0, 0, 1, 1]
 
-	@test rankMethod(G, A, c, b) == [1, 1, 0, -1/2]
+	@test rankMethod(G, A, c, b) == [1, 1, 0, -1 / 2]
 
 	# Cambiando G a una no-positiva definida
-	G = [1 1 0 0; -1 -1 0 0; 0 0 4 2; 0 0 2 2]
+	G = [1 1 0 0;
+		-1 -1 0 0;
+		0 0 4 2;
+		0 0 2 2]
+	
 	@test_throws ArgumentError rankMethod(G, A, c, b)
 
 	# Test linprog
@@ -43,25 +49,25 @@ using .Utils, LinearAlgebra
 	# Punto sobre el hiperplano
 	@test 𝒜(A, b, [1, 1, 1]) == [1, 0, 0, 0]
 	@test 𝒜(A, b, [0, 0, 0]) == [0, 1, 1, 1]
-
-	# Testeando conjunto activo
-	A = [1 1 1;
-	-1 0 0;
-	0 -1 0;
-	0 0 -1]
-
-	b = [3, 0, 0, 0]
-
-	A_E = A[1, :]'
-	b_E = b[1]
-	A_I = A[2:end, :]
-	b_I = b[2:end]
-
-	G = I(3)
-
-	c = [-1, -1, -1]
-
-	@test activeSetMethod(G, c, A_E, b_E, A_I, b_I) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
-
-
 end 
+
+@testset "Tests principales del conjunto de método activo" begin
+# Testeando conjunto activo
+A = [1 1 1;
+-1 0 0;
+0 -1 0;
+0 0 -1]
+
+b = [3, 0, 0, 0]
+
+A_E = A[1, :]'
+b_E = b[1]
+A_I = A[2:end, :]
+b_I = b[2:end]
+
+G = I(3)
+
+c = [-1, -1, -1]
+
+@test activeSetMethod(G, c, A_E, b_E, A_I, b_I) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
+end
