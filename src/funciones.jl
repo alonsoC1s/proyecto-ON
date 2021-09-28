@@ -48,10 +48,14 @@ end
 Envuelve JuMP y la rutina de simplex para devolver un punto factible al un problema 
 cuadrático con restricciones de desigualdad con `m` restricciones y `n` variables.
 
-Resuelve:
-	min sum(ones(n))
-	s.a A * x = b_E
-		A * x <= b_I
+Resuelve el problema
+```math
+\\begin{align*}
+\\min 1^\\top x \\\\
+A x &= b_E \\\\
+A x &≤ b_I
+\\end{align*}
+```
 
 # Arguments
 - `A::Matrix(m, n)`: La matriz de restricciones del problema. 
@@ -61,9 +65,6 @@ n = n_e + n_i
 """
 function linprog(A_E, b_E, A_I, b_I)
 	# Guardando número de igualdades & desigualdades
-	# n_e = length(b_E)
-	# n_i = length(b_I)
-	# n = length(b_E) + length(b_I)
 	n = size(A_E, 2)
 
 	# Inicializando modelo
@@ -88,7 +89,7 @@ end
 
 Regresa los indices de las restricciones de activas (de igualdad & desigualdad)
 
-#Arguments
+# Arguments
 - `A::Matrix(m, n)`: La matriz de restricciones del problema. 
 - `b::Vector(n)`: Vector de restricciones.
 - `x::Vector(m)`: Punto donde se evalua la restriccion.
@@ -99,13 +100,12 @@ function 𝒜(A, b, x)
 end
 
 """
-	PC_2_8(G, A, g)
+	solve2_8(G, A, g)
 
-Envoltorio de metodo de resolucion para problemas cuadraticos con igualdades.
+Envoltorio para el metodo del rango para resolucion de problemas cuadraticos con igualdades.
 
 # Arguments
-- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema 
-cuadrático.
+- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema cuadrático.
 - `A_k::Matrix{Float64}(m, n)`: La matriz de restricciones de W_k.
 - `g_k::Vector{Float64}(n)`: g_k del algoritmo de conjunto activo
 """
@@ -113,16 +113,49 @@ function solve2_8(G, A_k, g_k)
 	return rankMethod(G, A_k, g_k, zeros(size(A_k, 1)))
 end
 
+"""
+	solve2_9(A, b, x_k, d_k, atol=1e-12)
+
+Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
+
+```math
+\\check{\\alpha} = \\min_{\\substack{i \\notin W_0 \\\\ a_i^\\top b_0 > 0}}
+\\left( \\frac{b_i - a_i^\\top x_0}{a_i^\\top d_0} \\right)
+```
+
+# Arguments
+- `A::Matrix(m, n)`: La matriz de restricciones del problema.
+- `b::Vector(n)`: Vector de restricciones.
+- `x_k::Vector(n)`: Punto actual del método del conjunto activo.
+- `d_k::Vector(n)`: Dirección de descenso calculada con [`solve2_8`](@ref)
+- `atol::Float64`: Tolerancia absoluta (opcional).
+"""
 function solve2_9(A, b, x_k, d_k, atol=1e-12)
 	# Filtrar las j's tales que Aj^t dk > 0
 	noW_k = findall(A * d_k .> atol)
-	⌣α, j = findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
-	return (j, ⌣α)
+	return  findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
 end
 
+
+"""
+	solve2_11(g_k, A, W_k, n_eq)
+
+Resuelve el sistema lineal del problema (2.11) de las notas.
+
+```math
+\\sum_{i ∈ \\mathcal{e}} \\widehat{λ_i} a_i + \\sum_{i ∈ \\widehat{W} ∩ \\mathcal{I}}
+\\widehat{μ_i} a_i = - g_k
+```
+
+# Arguments
+- `g_k::Vector(n)`: `G * x_k + c`
+- `A::Matrix(m, n)`: La matriz de restricciones del problema.
+- `W_k::BitVector(m)`: Conjunto de restricciones activas en el punto actual.
+- `n_eq::Int`: Número de restricciones de igualdad del problema cuadrático.
+"""
 function solve2_11(g_k, A, W_k, n_eq)
 	A_k = copy(A)
-	A_k[findall(W_k .== 0), :] .= 0
+	A_k[.!W_k, :] .= 0
 	lag = A_k' \ (-g_k)
 	return (lag[1:n_eq], lag[n_eq + 1:end])
 end

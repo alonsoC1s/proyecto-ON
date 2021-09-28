@@ -1,11 +1,11 @@
 using Test
 
-include("../funciones.jl")
-include("../main.jl")
+include("../src/funciones.jl")
+include("../src/main.jl")
 
 using .Utils, LinearAlgebra
 
-@testset "Funciones auxiliares paa resolver el método de conjunto activo" begin
+@testset "Funciones auxiliares para resolver el método de conjunto activo" begin
 	# Testeando método del rango
     G = [2 1 0 0;
 		 1 2 0 0;
@@ -52,11 +52,11 @@ using .Utils, LinearAlgebra
 end 
 
 @testset "Tests principales del conjunto de método activo" begin
-# Testeando conjunto activo
+# Testeando conjunto activo con el ejemplo de clase
 A = [1 1 1;
--1 0 0;
-0 -1 0;
-0 0 -1]
+	-1 0 0;
+	0 -1 0;
+	0 0 -1]
 
 b = [3, 0, 0, 0]
 
