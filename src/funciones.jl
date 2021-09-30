@@ -2,8 +2,8 @@
 Funciones de apoyo para implementar el algoritmo principal.
 """
 module Utils
-	
-export rankMethod, linprog, 𝒜, solve2_8, solve2_11, solve2_9
+
+export rankMethod, linprog, 𝒜, solve2_8, solve2_11, solve2_9, klee_minty
 
 using LinearAlgebra
 using JuMP
@@ -24,22 +24,22 @@ cuadrático.
 """
 function rankMethod(G, A, c, b)
 
-	if !isposdef(G)
-		throw(ArgumentError("`G` debe ser positiva definida."))
-	end
+    if !isposdef(G)
+        throw(ArgumentError("`G` debe ser positiva definida."))
+    end
 
-	# Guardando productos que se reutilizan
-	Ginv = inv(G)
-	AGinv = A * Ginv
-	
-	# Calculando λ con (2.4)
-	# Resolviendo el sistema lineal con \ para no calcular inversas
-	λ = (AGinv * A') \ (-b - AGinv * c)
+    # Guardando productos que se reutilizan
+    Ginv = inv(G)
+    AGinv = A * Ginv
 
-	# Calculando x_* con (2.3)
-	x_star = (-Ginv * c) - (Ginv * A' * λ)
+    # Calculando λ con (2.4)
+    # Resolviendo el sistema lineal con \ para no calcular inversas
+    λ = (AGinv * A') \ (-b - AGinv * c)
 
-	return x_star
+    # Calculando x_* con (2.3)
+    x_star = (-Ginv * c) - (Ginv * A' * λ)
+
+    return x_star
 end
 
 """
@@ -64,23 +64,23 @@ A x &≤ b_I
 n = n_e + n_i
 """
 function linprog(A_E, b_E, A_I, b_I)
-	# Guardando número de igualdades & desigualdades
-	n = size(A_E, 2)
+    # Guardando número de igualdades & desigualdades
+    n = size(A_E, 2)
 
-	# Inicializando modelo
-	model = Model(GLPK.Optimizer)
+    # Inicializando modelo
+    model = Model(GLPK.Optimizer)
 
-	# Agregando n variables al modelo
-	@variable(model, x[1:n])
+    # Agregando n variables al modelo
+    @variable(model, x[1:n])
 
-	# Agregando restricciones de igualdad y desigualdad
-	@constraint(model, A_E * x .== b_E)
-	@constraint(model, A_I * x .<= b_I)
+    # Agregando restricciones de igualdad y desigualdad
+    @constraint(model, A_E * x .== b_E)
+    @constraint(model, A_I * x .<= b_I)
 
-	optimize!(model)
+    optimize!(model)
 
-	# Regresando el valor óptimo
-	return value.(x)
+    # Regresando el valor óptimo
+    return value.(x)
 end
 
 
@@ -96,7 +96,7 @@ Regresa los indices de las restricciones de activas (de igualdad & desigualdad)
 - 
 """
 function 𝒜(A, b, x)
-	return A * x .== b
+    return A * x .== b
 end
 
 """
@@ -110,7 +110,7 @@ Envoltorio para el metodo del rango para resolucion de problemas cuadraticos con
 - `g_k::Vector{Float64}(n)`: g_k del algoritmo de conjunto activo
 """
 function solve2_8(G, A_k, g_k)
-	return rankMethod(G, A_k, g_k, zeros(size(A_k, 1)))
+    return rankMethod(G, A_k, g_k, zeros(size(A_k, 1)))
 end
 
 """
@@ -130,10 +130,10 @@ Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
 - `d_k::Vector(n)`: Dirección de descenso calculada con [`solve2_8`](@ref)
 - `atol::Float64`: Tolerancia absoluta (opcional).
 """
-function solve2_9(A, b, x_k, d_k, atol=1e-12)
-	# Filtrar las j's tales que Aj^t dk > 0
-	noW_k = findall(A * d_k .> atol)
-	return  findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
+function solve2_9(A, b, x_k, d_k, atol = 1e-12)
+    # Filtrar las j's tales que Aj^t dk > 0
+    noW_k = findall(A * d_k .> atol)
+    return findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
 end
 
 
@@ -154,10 +154,35 @@ Resuelve el sistema lineal del problema (2.11) de las notas.
 - `n_eq::Int`: Número de restricciones de igualdad del problema cuadrático.
 """
 function solve2_11(g_k, A, W_k, n_eq)
-	A_k = copy(A)
-	A_k[.!W_k, :] .= 0
-	lag = A_k' \ (-g_k)
-	return (lag[1:n_eq], lag[n_eq + 1:end])
+    A_k = copy(A)
+    A_k[.!W_k, :] .= 0
+    lag = A_k' \ (-g_k)
+    return (lag[1:n_eq], lag[n_eq+1:end])
+end
+
+
+"""
+	klee_minty(n::Int)
+
+Regresa la matriz `G`, `A` y el vector `b` de restricciones dadas por el problema de Klee-Minty descrito en el proyecto.
+
+# Arguments
+- `n::Int`: Dimensión del problema de Klee-Minty.
+"""
+function klee_minty(n::Int)
+    # Creando matriz de coefs. de Klee-Minty
+    A = [2 * ones(n, n - 1) [ones(n - 1); 2]] - Diagonal(ones(n))
+
+    # Quitando la supradiagonal
+    for a = 2:n
+        A[1:a-1, a] = zeros(a - 1)
+    end
+
+    # Vector de constantes
+    b = (2 * ones(n)) .^ (1:n) .- 1
+
+	# Regresando G, c, A, b en ese orden
+	return 1e-4*I(n), ones(n), [A; -I(n)], [b; zeros(n)]
 end
 
 end
