@@ -46,19 +46,19 @@ Sujeto a
 \\end{align*}
 ```
 """
-function activeSetMethod(G, c, A_E, b_E, A_I, b_I, maxiter = 100, atol = 1e-9)
+function activeSetMethod(G, c, A, b, n_eq, maxiter = 100, atol = 1e-9)
     k = 0
     # Concatenando A & E en una sola matriz
-    A = [A_E; A_I]
-    b = [b_E; b_I]
+    #A = [A_E; A_I]
+    #b = [b_E; b_I]
 
-    n_eq = length(b_E) # Numero de igualdades
+    # n_eq = length(b_E) # Numero de igualdades
 
     # Encontrar x_0 con simplex
-    x_k = linprog(A_E, b_E, A_I, b_I)
+    x_k = linprog(A, b, n_eq)
 
     # Definir W0 
-    W_k = [trues(n_eq); falses(length(b_I))]
+    W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
     g_k = G * x_k + c
 
     while k < maxiter

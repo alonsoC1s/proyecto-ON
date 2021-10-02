@@ -40,7 +40,7 @@ using .Solvers, .Solvers.Utils, LinearAlgebra
 	A_I = A[2:end, :]
 	b_I = b[2:end]
 
-	@test linprog(A_E, b_E, A_I, b_I) == [3, 0, 0]
+	@test linprog(A, b, 1) == [3, 0, 0]
 
 	# Test funcion \scA
 	## Probando sobre el hiperplano x + y + z = 3; x, y, z > 0
@@ -59,14 +59,15 @@ A = [1 1 1;
 
 b = [3, 0, 0, 0]
 
-A_E = A[1, :]'
+#= A_E = A[1, :]'
 b_E = b[1]
 A_I = A[2:end, :]
-b_I = b[2:end]
+b_I = b[2:end] =#
 
 G = I(3)
 
 c = [-1, -1, -1]
 
-@test activeSetMethod(G, c, A_E, b_E, A_I, b_I) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
+@test activeSetMethod(G, c, A, b, 1) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
+
 end

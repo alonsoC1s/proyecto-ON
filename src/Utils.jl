@@ -63,9 +63,9 @@ A x &≤ b_I
 - `b_I::Vector(n_i)`: Vector de restricciones de desigualdad.
 n = n_e + n_i
 """
-function linprog(A_E, b_E, A_I, b_I)
-    # Guardando número de igualdades & desigualdades
-    n = size(A_E, 2)
+function linprog(A, b, n_eq)
+    # Guardando número de variables
+    n = size(A, 2)
 
     # Inicializando modelo
     model = Model(GLPK.Optimizer)
@@ -74,8 +74,8 @@ function linprog(A_E, b_E, A_I, b_I)
     @variable(model, x[1:n])
 
     # Agregando restricciones de igualdad y desigualdad
-    @constraint(model, A_E * x .== b_E)
-    @constraint(model, A_I * x .<= b_I)
+    @constraint(model, A[1:n_eq, :] * x .== b[1:n_eq])
+    @constraint(model, A[n_eq + 1:end, :] * x .<= b[n_eq + 1:end])
 
     optimize!(model)
 
@@ -129,7 +129,7 @@ Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
 - `d_k::Vector(n)`: Dirección de descenso calculada con [`solve2_8`](@ref)
 - `atol::Float64`: Tolerancia absoluta (opcional).
 """
-function solve2_9(A, b, x_k, d_k, atol = 1e-12)
+function solve2_9(A, b, x_k, d_k, atol=1e-12)
     # Filtrar las j's tales que Aj^t dk > 0
     noW_k = findall(A * d_k .> atol)
     return findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
@@ -156,7 +156,7 @@ function solve2_11(g_k, A, W_k, n_eq)
     A_k = copy(A)
     A_k[.!W_k, :] .= 0
     lag = A_k' \ (-g_k)
-    return (lag[1:n_eq], lag[n_eq+1:end])
+    return (lag[1:n_eq], lag[n_eq + 1:end])
 end
 
 
@@ -174,14 +174,14 @@ function klee_minty(n::Int)
 
     # Quitando la supradiagonal
     for a = 2:n
-        A[1:a-1, a] = zeros(a - 1)
+        A[1:a - 1, a] = zeros(a - 1)
     end
 
     # Vector de constantes
-    b = (2 * ones(n)) .^ (1:n) .- 1
+    b = (2 * ones(n)).^(1:n) .- 1
 
 	# Regresando G, c, A, b en ese orden
-	return 1e-4*I(n), ones(n), [A; -I(n)], [b; zeros(n)]
+	return 1e-4 * I(n), ones(n), [A; -I(n)], [b; zeros(n)]
 end
 
 end
