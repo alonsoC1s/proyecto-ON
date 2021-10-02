@@ -1,9 +1,8 @@
 using Test
 
-include("../src/funciones.jl")
-include("../src/main.jl")
+include("../src/Solvers.jl")
 
-using .Utils, LinearAlgebra
+using .Solvers, .Solvers.Utils, LinearAlgebra
 
 @testset "Funciones auxiliares para resolver el método de conjunto activo" begin
 	# Testeando método del rango

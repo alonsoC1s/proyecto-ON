@@ -1,15 +1,52 @@
 """
 Implementacion principal del metodo de conjunto activo
 """
+module Solvers
 
 # Incluyendo y usando el módulo de utils definido en el archivo funcines.jl
-include("funciones.jl")
-using .Utils
+include("Utils.jl")
+using .Utils, LinearAlgebra
 
-using LinearAlgebra
+export OptimizeResult, activeSetMethod
 
-# TODO: Igual y vale la pena pedir A & E completas y partirlas manualmente con n_eq
-function activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
+"""
+	OptimizeResult{T<:Real}
+
+El el tipo de resultado de aplicar [`activeSetMethod`](@ref), el algoritmo de optimización 
+del conjunto activo para problemas de optimización cuadrática.
+
+Si `R::OptimizeResult` es el resultado de aplicar el algoritmo del conjunto activo se 
+pueden obtener las interaciones como `R.iters`, el punto óptimo como `R.x_star` y el valor 
+de la función objetivo en el punto como `R.q_star`. También se puede obtener "estilo 
+Matlab".
+
+# Examples
+```julia
+iters, x_star, q_star = activeSetMethod(G, c, A_E, b_E, A_I, b_I)
+```
+"""
+struct OptimizeResult{T<:Real}
+	iters::Integer
+	x_star::Vector{T}
+	q_star::T
+end
+
+"""
+	activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
+
+Aplica el algoritmo de conjunto activo para optimizar el problema cuadrático:
+```math
+\\min \\frac{1}{2} x^\\top G x + c^\\top x
+```
+Sujeto a
+```math
+\\begin{align*}
+	A_E x = b_E \\\\
+	A_I x \\leq B_I
+\\end{align*}
+```
+"""
+function activeSetMethod(G, c, A_E, b_E, A_I, b_I, maxiter = 100, atol = 1e-9)
     k = 0
     # Concatenando A & E en una sola matriz
     A = [A_E; A_I]
@@ -24,7 +61,7 @@ function activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
     W_k = [trues(n_eq); falses(length(b_I))]
     g_k = G * x_k + c
 
-    while (true)
+    while k < maxiter
         # Obtener d_k de (2.8) con W_k
         d_k = solve2_8(G, A[W_k, :], g_k)
 
@@ -36,7 +73,7 @@ function activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
             x_k = x_k + min(1, α) .* d_k
 
             print("Rama 1. ||d_k|| = $(norm(d_k, Inf)), ")
-            print("q(x) = , α=$(α)")
+			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α)") 
 
             if α < 1
                 print("k = $(k)")
@@ -70,4 +107,6 @@ function activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
             W_k[n_eq+j] = false
         end
     end
+end
+
 end

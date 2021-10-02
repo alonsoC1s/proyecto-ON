@@ -93,7 +93,6 @@ Regresa los indices de las restricciones de activas (de igualdad & desigualdad)
 - `A::Matrix(m, n)`: La matriz de restricciones del problema. 
 - `b::Vector(n)`: Vector de restricciones.
 - `x::Vector(m)`: Punto donde se evalua la restriccion.
-- 
 """
 function 𝒜(A, b, x)
     return A * x .== b

@@ -2,5 +2,5 @@
 Hola
 
 ```@autodocs
-Modules = [Utils]
+Modules = [Solvers, Utils]
 ```
