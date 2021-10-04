@@ -1,6 +1,6 @@
 using Test
 
-include("../src/Solvers.jl")
+includet("../src/Solvers.jl")
 
 using .Solvers, .Solvers.Utils, LinearAlgebra
 
@@ -42,7 +42,7 @@ using .Solvers, .Solvers.Utils, LinearAlgebra
 
 	@test linprog(A, b, 1) == [3, 0, 0]
 
-	# Test funcion \scA
+	# Test funcion 𝒜
 	## Probando sobre el hiperplano x + y + z = 3; x, y, z > 0
 
 	# Punto sobre el hiperplano
@@ -69,5 +69,22 @@ G = I(3)
 c = [-1, -1, -1]
 
 @test activeSetMethod(G, c, A, b, 1) == ([1.0, 1.0, 1.0], [0.0], [0.0, 0.0, 0.0])
+
+# Test con problema 1 del proyecto.
+G = [1 0; 0 1]
+c = [-1, -2.5]
+b = [2, 6, 2, 0, 0]
+
+A = [-1 2;
+    1 2;
+    1 -2;
+    -1 0;
+    0 -1]
+
+n_eq = 0
+
+W_k = [falses(2); true; falses(2)]
+
+# @test activeSetMethod(G, c, A, b, n_eq, W_k)[1] == [1.4, 1.7]
 
 end

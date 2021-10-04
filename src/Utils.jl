@@ -74,7 +74,10 @@ function linprog(A, b, n_eq)
     @variable(model, x[1:n])
 
     # Agregando restricciones de igualdad y desigualdad
-    @constraint(model, A[1:n_eq, :] * x .== b[1:n_eq])
+    if n_eq > 0
+        @constraint(model, A[1:n_eq, :] * x .== b[1:n_eq])
+    end
+    
     @constraint(model, A[n_eq + 1:end, :] * x .<= b[n_eq + 1:end])
 
     optimize!(model)

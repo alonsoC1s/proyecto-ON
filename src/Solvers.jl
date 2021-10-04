@@ -46,7 +46,7 @@ Sujeto a
 \\end{align*}
 ```
 """
-function activeSetMethod(G, c, A, b, n_eq, maxiter = 100, atol = 1e-9)
+function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1e-9)
     k = 0
     # Concatenando A & E en una sola matriz
     #A = [A_E; A_I]
@@ -57,15 +57,18 @@ function activeSetMethod(G, c, A, b, n_eq, maxiter = 100, atol = 1e-9)
     # Encontrar x_0 con simplex
     x_k = linprog(A, b, n_eq)
 
-    # Definir W0 
-    W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
+    # Definir W0
+    if W_k === nothing
+        W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
+    end
+
     g_k = G * x_k + c
 
     while k < maxiter
         # Obtener d_k de (2.8) con W_k
         d_k = solve2_8(G, A[W_k, :], g_k)
 
-        # norm(d_k, Inf) < atol
+        #if norm(d_k, Inf) < atol
         if !isapprox(d_k, zero(d_k), atol = atol)
             # ==============RAMA 1====================
             #  Encontrar α gorro y j con (2.9)
@@ -73,7 +76,7 @@ function activeSetMethod(G, c, A, b, n_eq, maxiter = 100, atol = 1e-9)
             x_k = x_k + min(1, α) .* d_k
 
             print("Rama 1. ||d_k|| = $(norm(d_k, Inf)), ")
-			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α)") 
+			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α) ") 
 
             if α < 1
                 print("k = $(k)")
