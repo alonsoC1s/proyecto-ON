@@ -68,8 +68,8 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
         # Obtener d_k de (2.8) con W_k
         d_k = solve2_8(G, A[W_k, :], g_k)
 
-        #if norm(d_k, Inf) < atol
-        if !isapprox(d_k, zero(d_k), atol = atol)
+        if norm(d_k, Inf) >= atol
+        # if !isapprox(d_k, zero(d_k), atol = atol)
             # ==============RAMA 1====================
             #  Encontrar α gorro y j con (2.9)
             α, j = solve2_9(A, b, x_k, d_k, atol)
