@@ -57,12 +57,17 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
     # Encontrar x_0 con simplex
     x_k = linprog(A, b, n_eq)
 
-    # Definir W0
+	# Definir W0
     if W_k === nothing
         W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
     end
 
+	if n_eq == 0
+		W_k = [falses(Int(size(A, 1)/2)); trues(Int(size(A, 1)/2))]
+	end
+
     g_k = G * x_k + c
+
 
     while k < maxiter
         # Obtener d_k de (2.8) con W_k
@@ -98,7 +103,7 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
 
             print("Rama 2. ")
 
-            if μ_min <= atol
+			if -eps(Float64) <= μ_min
                 println("j = $(j), μ=$(μ_min) ")
                 # La solución es óptima
                 return (x_k, λ, μ)

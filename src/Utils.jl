@@ -5,7 +5,7 @@ module Utils
 
 export rankMethod, linprog, 𝒜, solve2_8, solve2_11, solve2_9, klee_minty
 
-using LinearAlgebra
+using LinearAlgebra, SparseArrays
 using JuMP
 using GLPK
 
@@ -156,7 +156,13 @@ Resuelve el sistema lineal del problema (2.11) de las notas.
 - `n_eq::Int`: Número de restricciones de igualdad del problema cuadrático.
 """
 function solve2_11(g_k, A, W_k, n_eq)
-    A_k = copy(A)
+	# Feo, pero necesario en caso de tener Sparse
+	if issparse(A)
+		A_k = copy(Matrix(A))
+	else
+		A_k = copy(A)
+    end
+
     A_k[.!W_k, :] .= 0
     lag = A_k' \ (-g_k)
     return (lag[1:n_eq], lag[n_eq + 1:end])
@@ -172,19 +178,11 @@ Regresa la matriz `G`, `A` y el vector `b` de restricciones dadas por el problem
 - `n::Int`: Dimensión del problema de Klee-Minty.
 """
 function klee_minty(n::Int)
-    # Creando matriz de coefs. de Klee-Minty
-    A = [2 * ones(n, n - 1) [ones(n - 1); 2]] - Diagonal(ones(n))
-
-    # Quitando la supradiagonal
-    for a = 2:n
-        A[1:a - 1, a] = zeros(a - 1)
-    end
-
-    # Vector de constantes
+	# Vector de constantes
     b = (2 * ones(n)).^(1:n) .- 1
 
 	# Regresando G, c, A, b en ese orden
-	return 1e-4 * I(n), ones(n), [A; -I(n)], [b; zeros(n)]
+	return 1e-4 * I(n), ones(n), [LowerTriangular(ones(n, n) + Diagonal(ones(n))); -I(n)], [b; zeros(n)]
 end
 
 end
