@@ -28,6 +28,11 @@ function rankMethod(G, A, c, b)
         throw(ArgumentError("`G` debe ser positiva definida."))
     end
 
+    # Teniendo que convertir a A en full por el operador \
+    if issparse(A)
+        A = copy(Matrix(A))
+    end
+
     # Guardando productos que se reutilizan
     Ginv = inv(G)
     AGinv = A * Ginv
