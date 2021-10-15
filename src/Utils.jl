@@ -137,9 +137,10 @@ Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
 - `d_k::Vector(n)`: Dirección de descenso calculada con [`solve2_8`](@ref)
 - `atol::Float64`: Tolerancia absoluta (opcional).
 """
-function solve2_9(A, b, x_k, d_k, atol=1e-12)
-    # Filtrar las j's tales que Aj^t dk > 0
-    noW_k = findall(A * d_k .> atol)
+function solve2_9(A, b, x_k, d_k, W_k, atol=1e-9)
+    # Filtrar las j's tales que A_j^t * dk > 0
+    # Aqui falta la condición AND j ∉ W_k, no?
+    noW_k = findall((A * d_k .> atol) .* .!W_k)
     α, j = findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
     return (α, noW_k[j])
 end

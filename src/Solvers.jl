@@ -87,20 +87,15 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
         # Obtener d_k de (2.8) con W_k
         d_k = solve2_8(G, A[W_k, :], g_k)
 
-        println("d_k = $(d_k)")
-
         if norm(d_k, Inf) >= atol
             # ==============RAMA 1====================
             #  Encontrar α gorro y j con (2.9)
 
-            α, j = solve2_9(A, b, x_k, d_k, atol)
+            α, j = solve2_9(A, b, x_k, d_k, W_k, atol)
 
             println("α = $(α), j = $(j) \n")
 
-            # println("W_k = $(W_k) \n\n")
-
             x_k = x_k + min(1, α) .* d_k
-            # println("$(x_k)\n")
 
             print("Rama 1. ||d_k|| = $(norm(d_k, Inf)), ")
 			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α) ") 
@@ -122,10 +117,6 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
             λ, μ = solve2_11(g_k, A, W_k, n_eq)
             # Encontrar un j en las inequalities con el menor μ
             μ_min, j = findmin(μ)
-
-            # println("W_k = $(W_k)")
-            # println("g_k = $(g_k)")
-            # println("λ = $(λ), j = $(j), μ = $(μ)")
 
             print("Rama 2. ")
 
