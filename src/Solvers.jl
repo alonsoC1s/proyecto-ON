@@ -22,17 +22,27 @@ Matlab".
 
 # Examples
 ```julia
-iters, x_star, q_star = activeSetMethod(G, c, A_E, b_E, A_I, b_I)
+iters, x_star, q_star, μ = activeSetMethod(G, c, A_E, b_E, A_I, b_I)
 ```
 """
 struct OptimizeResult{T<:Real}
 	iters::Integer
-	x_star::Vector{T}
-	q_star::T
+	x_star::Union{Vector{T}, Nothing}
+	q_star::Union{T, Nothing}
+    μ::Union{Vector{T}, Nothing}
 end
 
+# Implementando la interfaz de iteración para poder hacer destructuring
+Base.iterate(or::OptimizeResult) = (or.iters, Val(:x))
+Base.iterate(or::OptimizeResult, ::Val{:x}) = (or.x_star, Val(:q))
+Base.iterate(or::OptimizeResult, ::Val{:q}) = (or.q_star, Val(:μ))
+Base.iterate(or::OptimizeResult, ::Val{:μ}) = (or.μ, Val(:done))
+Base.iterate(or::OptimizeResult, ::Val{:done}) = nothing
+
+
+
 """
-	activeSetMethod(G, c, A_E, b_E, A_I, b_I, atol = 1e-9)
+    activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1e-9)
 
 Aplica el algoritmo de conjunto activo para optimizar el problema cuadrático:
 ```math
@@ -45,40 +55,52 @@ Sujeto a
 	A_I x \\leq B_I
 \\end{align*}
 ```
+
+# Arguments
+- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema cuadrático.
+- `c::Vector{Float64}(n)`: Vector de costos de la funciób objetivo.
+- `A::Matrix{Float64}(m, n)`: La matriz de restricciones.
+- `b::Vector{Float64}(n)`: Vector de constantes de las restricciones
+- `n_eq::Int`: Número de restricciones de igualdad del problema cuadrático.
+- `W_k::BitVector(m)`: Opcional. Restricciones a tomar como activas en el primer paso del método.
+- `maxiter::Int = 100`: Opcional. Limita el máximo de iteraciones del método.
+- `atol::Float64`: Opcional. Determina la distancia máxima a la que puede estar d_k de cero cuando se determina si entrar a rama1.
 """
 function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1e-9)
     k = 0
-    # Concatenando A & E en una sola matriz
-    #A = [A_E; A_I]
-    #b = [b_E; b_I]
-
-    # n_eq = length(b_E) # Numero de igualdades
 
     # Encontrar x_0 con simplex
     x_k = linprog(A, b, n_eq)
 
 	# Definir W0
     if W_k === nothing
-        W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
+        if n_eq != 0
+            W_k = [trues(n_eq); falses(size(A, 1) - n_eq)]
+        else
+            throw(ArgumentError("Para los problemas en los que todas las restricciones son de desigualdad se debe indicar explícitamente el conjunto `W_0`."))
+        end
     end
 
-	if n_eq == 0
-		W_k = [falses(Int(size(A, 1)/2)); trues(Int(size(A, 1)/2))]
-	end
-
     g_k = G * x_k + c
-
 
     while k < maxiter
         # Obtener d_k de (2.8) con W_k
         d_k = solve2_8(G, A[W_k, :], g_k)
 
+        println("d_k = $(d_k)")
+
         if norm(d_k, Inf) >= atol
-        # if !isapprox(d_k, zero(d_k), atol = atol)
             # ==============RAMA 1====================
             #  Encontrar α gorro y j con (2.9)
+
             α, j = solve2_9(A, b, x_k, d_k, atol)
+
+            println("α = $(α), j = $(j) \n")
+
+            # println("W_k = $(W_k) \n\n")
+
             x_k = x_k + min(1, α) .* d_k
+            # println("$(x_k)\n")
 
             print("Rama 1. ||d_k|| = $(norm(d_k, Inf)), ")
 			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α) ") 
@@ -101,12 +123,17 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
             # Encontrar un j en las inequalities con el menor μ
             μ_min, j = findmin(μ)
 
+            # println("W_k = $(W_k)")
+            # println("g_k = $(g_k)")
+            # println("λ = $(λ), j = $(j), μ = $(μ)")
+
             print("Rama 2. ")
 
 			if -eps(Float64) <= μ_min
                 println("j = $(j), μ=$(μ_min) ")
                 # La solución es óptima
-                return (x_k, λ, μ)
+                # return (x_k, λ, μ)
+                return OptimizeResult(k, x_k, x_k' * G * x_k + c' * x_k, μ)
             end
 
             println("")
@@ -115,6 +142,8 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
             W_k[n_eq+j] = false
         end
     end
+    # Se sobrepasó maxiter
+    return OptimizeResult(maxiter, x_k, nothing, nothing)
 end
 
-end
+end # end module Solvers

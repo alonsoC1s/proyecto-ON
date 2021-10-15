@@ -25,3 +25,4 @@ Manifest.toml
 .nvimlog
 .DS_Store
 *.DS_Store
+.vscode/

@@ -16,8 +16,7 @@ Implementación del método de rango para resolver problemas de programación cu
 (PPC) con restricciones ``Ax = b``.
 
 # Arguments
-- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema 
-cuadrático.
+- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema cuadrático.
 - `A::Matrix{Float64}(m, n)`: La matriz de restricciones.
 - `c::Vector{Float64}(n)`: Vector de costos de la funciób objetivo.
 - `b::Vector{Float64}(n)`: Vector de constantes de las restricciones
@@ -48,7 +47,21 @@ function rankMethod(G, A, c, b)
 end
 
 """
-	linprog(A, b_E, b_I)
+	solve2_8(G, A_k, g_k)
+
+Envoltorio para el metodo del rango para resolucion de problemas cuadraticos con igualdades.
+
+# Arguments
+- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema cuadrático.
+- `A_k::Matrix{Float64}(m, n)`: La matriz de restricciones de W_k.
+- `g_k::Vector{Float64}(n)`: g_k del algoritmo de conjunto activo
+"""
+function solve2_8(G, A_k, g_k)
+    return rankMethod(G, A_k, g_k, zeros(size(A_k, 1)))
+end
+
+"""
+	linprog(A, b, n_eq)
 
 Envuelve JuMP y la rutina de simplex para devolver un punto factible al un problema 
 cuadrático con restricciones de desigualdad con `m` restricciones y `n` variables.
@@ -58,14 +71,14 @@ Resuelve el problema
 \\begin{align*}
 \\min 1^\\top x \\\\
 A x &= b_E \\\\
-A x &≤ b_I
+A x &\\leq b_I
 \\end{align*}
 ```
 
 # Arguments
 - `A::Matrix(m, n)`: La matriz de restricciones del problema. 
-- `b_E::Vector(n_e)`: Vector de restricciones de igualdad.
-- `b_I::Vector(n_i)`: Vector de restricciones de desigualdad.
+- `b::Vector(n_e)`: Vector de restricciones.
+- `n_eq::Int`: Número de restricciones de igualdad del problema
 n = n_e + n_i
 """
 function linprog(A, b, n_eq)
@@ -106,19 +119,6 @@ function 𝒜(A, b, x)
     return A * x .== b
 end
 
-"""
-	solve2_8(G, A, g)
-
-Envoltorio para el metodo del rango para resolucion de problemas cuadraticos con igualdades.
-
-# Arguments
-- `G::Matriz{Float64}(n, n)`: Matriz positiva definida de la definición del problema cuadrático.
-- `A_k::Matrix{Float64}(m, n)`: La matriz de restricciones de W_k.
-- `g_k::Vector{Float64}(n)`: g_k del algoritmo de conjunto activo
-"""
-function solve2_8(G, A_k, g_k)
-    return rankMethod(G, A_k, g_k, zeros(size(A_k, 1)))
-end
 
 """
 	solve2_9(A, b, x_k, d_k, atol=1e-12)
@@ -140,7 +140,8 @@ Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
 function solve2_9(A, b, x_k, d_k, atol=1e-12)
     # Filtrar las j's tales que Aj^t dk > 0
     noW_k = findall(A * d_k .> atol)
-    return findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
+    α, j = findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
+    return (α, noW_k[j])
 end
 
 
@@ -150,8 +151,9 @@ end
 Resuelve el sistema lineal del problema (2.11) de las notas.
 
 ```math
-\\sum_{i ∈ \\mathcal{e}} \\widehat{λ_i} a_i + \\sum_{i ∈ \\widehat{W} ∩ \\mathcal{I}}
-\\widehat{μ_i} a_i = - g_k
+\\sum_{i \\in \\mathcal{E}} \\widehat{\\lambda_i} a_i +
+\\sum_{i \\in \\widehat{W} \\cap \\mathcal{I}}
+\\widehat{\\mu_i} a_i = - g_k
 ```
 
 # Arguments
@@ -167,7 +169,7 @@ function solve2_11(g_k, A, W_k, n_eq)
 	else
 		A_k = copy(A)
     end
-
+    
     A_k[.!W_k, :] .= 0
     lag = A_k' \ (-g_k)
     return (lag[1:n_eq], lag[n_eq + 1:end])
@@ -181,6 +183,9 @@ Regresa la matriz `G`, `A` y el vector `b` de restricciones dadas por el problem
 
 # Arguments
 - `n::Int`: Dimensión del problema de Klee-Minty.
+
+# Returns
+Regresa las matrices `G`, `c`, `A`, `b` en ese orden.
 """
 function klee_minty(n::Int)
 	# Vector de constantes
@@ -190,4 +195,4 @@ function klee_minty(n::Int)
 	return 1e-4 * I(n), ones(n), [LowerTriangular(ones(n, n) + Diagonal(ones(n))); -I(n)], [b; zeros(n)]
 end
 
-end
+end # end module Utils
