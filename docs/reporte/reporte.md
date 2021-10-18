@@ -655,7 +655,7 @@ con un valor óptimo de 108291.05, que se obtuvo en 77 iteraciones.
 
 Gracias a que verificamos los resultados utilizando la rutina 
 `quadprog` de [Matlab]{.smallcaps} y la librería JuMP, además de 
-seguir un conjunto de pruebas unitarias confiamos en que los 
+seguir un conjunto de pruebas unitarias, confiamos en que los 
 resultados de nuestra implementación del algoritmo del conjunto activo
 es correcta y robusta. Adicionalmente, notamos que nuestra 
 implementación es sumamente rápida.
@@ -681,10 +681,10 @@ Como podemos ver, en 42 _samples_ nuestra implementación del algoritmo
 toma en promedio 121 ms! Además, asigna alrededor de 24 MiB de memoria 
 en total, lo cual es sumamente razonable tomando en cuenta la 
 dimensión del problema. Todo esto gracias a el uso de matrices 
-_sparse_. En la figura \ref{histograma} se puede ver un histograma de 
-la frecuencia de tiempos de ejecución.
+_sparse_. En la figura \ref{fig:histograma} se puede ver un histograma 
+de la frecuencia de tiempos de ejecución.
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \input{../histograma.tex}
 \caption{Histograma de frecuencia por tiempo}
