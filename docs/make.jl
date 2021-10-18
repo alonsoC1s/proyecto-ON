@@ -1,12 +1,11 @@
-include("../src/Utils.jl")
 include("../src/Solvers.jl")
 
-using Documenter, .Utils, .Solvers
+# using Documenter, .Solvers.Utils, .Solvers
 
 makedocs(
-    modules = [Utils, Solvers],
+    modules = [Solvers.Utils, Solvers],
     format = Documenter.HTML(),
-    sitename = "Optimización Numéria - Proyecto 1",
+    sitename = "Optimización Numérica - Proyecto 1",
     authors  = "Alonso Martinez",
     pages = [
         "Home" => "index.md",

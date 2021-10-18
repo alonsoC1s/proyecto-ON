@@ -45,7 +45,7 @@ header-includes:
 		export, using, =, copy, issparse, Matrix, isposdef, inv, 
 		zeros, size, findall, findmin, ones, else, length, I, trues,
         isfinite., abs., abs, eps, Float64, julia>, julia, println, Bool, rand,
-        prinln, round},
+		prinln, round, pkg},
         morekeywords = [1]{1,2,3,40},
 		sensitive=false,
 		morestring=[s]{"}{"},
@@ -84,11 +84,12 @@ $$
 \end{array}
 $${#eq:pc tag="P"}
 
-Nos servimos de las libreías `JuMP` [@JuMP], y `MAT` del ecosistema Julia para
-aplicar el método Simplex y para leer archivos en formato `.mat`
-respectivamente. Adicionalmente llevamos a cabo _benchmarks_ con el paquete
-`BenchmarkTools` para evaluar el desempeño de nuestro algoritmo y pruebas
-unitarias para hacer el proceso de desarrollo más fácil.
+Nos servimos de las librerías `JuMP` [@JuMP], y `MAT` del ecosistema 
+Julia para aplicar el método Simplex y para leer archivos en formato 
+`.mat` respectivamente. Adicionalmente llevamos a cabo _benchmarks_ 
+con el paquete `BenchmarkTools` para evaluar el desempeño de nuestro 
+algoritmo y pruebas unitarias para hacer el proceso de desarrollo más 
+fácil.
 
 
 # Problemas
@@ -190,7 +191,8 @@ end
 ```
 
 La selección es aleatoria, entonces la $W_0$ que presentamos está sujeta a
-cambios, pero la presentamos con fines ilustrativos de cualquer manera.
+cambios, pero la presentamos con fines ilustrativos de cualquier 
+manera.
 
 ```
 julia>
@@ -238,18 +240,7 @@ El punto de paro fue:
 15-element Vector{Float64}:
  0.0
  0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
- 0.0
+ ~\vdots~
  0.0
 ```
 
@@ -327,11 +318,12 @@ $$
 
 Donde $\varepsilon_{m}$ es el épsilon de la máquina `eps(Float64)`.
 
-A continuación presentamos el código que se utilizó para construir el problema y
-encontrar las restricciones que pertenecen a $J$. El código se presenta
-recortado (excluímos el código para obtener los datos del archivo .mat y
-comentarios aclaratorios) en interés de la brevedad, pero se puede encontarar código
-completo en el script incluído `script3.ipynb`.
+A continuación presentamos el código que se utilizó para construir el 
+problema y encontrar las restricciones que pertenecen a $J$. El código 
+se presenta recortado (excluimos el código para obtener los datos del 
+archivo .mat y comentarios aclaratorios) en interés de la brevedad, 
+pero se puede encontrar código completo en el script incluido 
+`script3.ipynb`.
 
 ```julia
 n_eq = length(b)
@@ -659,7 +651,22 @@ julia> print(round.(x_star; sigdigits=4))
 
 con un valor óptimo de 108291.05, que se obtuvo en 77 iteraciones.
 
-# Conclusiones (?)
+# Conclusiones
+
+Gracias a que verificamos los resultados utilizando la rutina 
+`quadprog` de [Matlab]{.smallcaps} y la librería JuMP, además de 
+seguir un conjunto de pruebas unitarias confiamos en que los 
+resultados de nuestra implementación del algoritmo del conjunto activo
+es correcta y robusta. Adicionalmente, notamos que nuestra 
+implementación es sumamente rápida.
+
+Para investigar sobre el desempeño cuantitativamente utilizamos el 
+paquete `BenchmarkTools`, y a continuación presentamos los resultados 
+de un _benchmark_. Un _benchmark_ consiste en un número definido de 
+_samples_, de los cuales se mide el tiempo de ejecución excluyendo el 
+tiempo que toma preparar los datos. Abajo presentamos los resultados 
+de un _benchmark_ aplicado a el problema 3, que es el el más grande 
+del cual disponemos.
 
 ```
 BenchmarkTools.Trial: 42 samples with 1 evaluation.
@@ -670,13 +677,57 @@ BenchmarkTools.Trial: 42 samples with 1 evaluation.
  Memory estimate: 45.41 MiB, allocs estimate: 36556.
 ```
 
-Figura chida
+Como podemos ver, en 42 _samples_ nuestra implementación del algoritmo
+toma en promedio 121 ms! Además, asigna alrededor de 24 MiB de memoria 
+en total, lo cual es sumamente razonable tomando en cuenta la 
+dimensión del problema. Todo esto gracias a el uso de matrices 
+_sparse_. En la figura \ref{histograma} se puede ver un histograma de 
+la frecuencia de tiempos de ejecución.
 
 \begin{figure}[H]
 \centering
 \input{../histograma.tex}
 \caption{Histograma de frecuencia por tiempo}
+\label{fig:histograma}
 \end{figure}
 
+### Algunos comentarios y aclaraciones
+
+Puesto que no suponemos familiaridad con el lenguaje Julia queremos 
+dar comentarios para hacer más sencilla su interacción con él en caso 
+de que quiera reproducir los resultados mediante los jupyter notebooks 
+provistos.
+
+- Para añadir el kernel de Julia a Jupyter necesita una instalación de 
+  Julia y el paquete `IJulia`. Para desarrollar el proyecto usamos la 
+  versión 1.6.3 de Julia.
+
+- Otros paquetes que usamos son:
+	- `JuMP`
+	- `GLPK`
+	- `MAT`
+	- `BenchmarkTools` (no esencial para probar el algoritmo)
+
+Para evitarle el problema de instalarlos, puede seguir estos pasos:
+
+1. Abrir un Julia REPL escribiendo `julia` en bash.
+2. Escribir `]` para que el prompt cambie de `julia>` a `pkg>`
+3. Escribir `activate .` en el prompt `pkg>`
+
+- Julia es compilado [_just in 
+  time_](https://en.wikipedia.org/wiki/Just-in-time_compilation), por 
+  lo que al iniciarse y la primera vez que se llama una función que no
+  ha sido compilada hay un tiempo de espera considerable. Le 
+  aseguramos que el programa no falló y podrá ver que las llamadas 
+  siguientes son mucho más rápidas.
+
+- Añadimos como apéndices a éste reporte la documentación de los 
+  métodos auxiliares usados en la implementación del algoritmo con la 
+  esperanza de hacerle amena la lectura del código fuente.
+
+- Julia permite usar caracteres unicode como identificadores, que 
+  aprovechamos para hacer más legible nuestro código. Si tiene 
+  problemas con caracteres faltantes o _artifacts_, le pedimos 
+  paciencia y sugerimos usar un emulador de terminal o font diferente.
 
 # Referencias

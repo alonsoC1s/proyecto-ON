@@ -2,5 +2,5 @@
 Hola
 
 ```@autodocs
-Modules = [Solvers, Utils]
+Modules = [Solvers, Solvers.Utils]
 ```
