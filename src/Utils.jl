@@ -139,7 +139,6 @@ Resuelve el problema (2.9) de las notas con tolerancia absoluta `atol`.
 """
 function solve2_9(A, b, x_k, d_k, W_k, atol=1e-9)
     # Filtrar las j's tales que A_j^t * dk > 0
-    # Aqui falta la condición AND j ∉ W_k, no?
     noW_k = findall((A * d_k .> atol) .* .!W_k)
     α, j = findmin((b[noW_k] - (A[noW_k, :] * x_k)) ./ (A[noW_k, :] * d_k))
     return (α, noW_k[j])

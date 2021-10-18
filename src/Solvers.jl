@@ -39,6 +39,13 @@ Base.iterate(or::OptimizeResult, ::Val{:q}) = (or.q_star, Val(:μ))
 Base.iterate(or::OptimizeResult, ::Val{:μ}) = (or.μ, Val(:done))
 Base.iterate(or::OptimizeResult, ::Val{:done}) = nothing
 
+# Pretty printing para optimize result
+function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, or::OptimizeResult)
+    println("Concluyó método del conjunto activo en $(or.iters) iteraciones")
+    println("El punto de paro fue:")
+    display(round.(or.x_star, sigdigits=4))
+end
+
 
 
 """
@@ -93,12 +100,13 @@ function activeSetMethod(G, c, A, b, n_eq,  W_k=nothing, maxiter = 100, atol = 1
 
             α, j = solve2_9(A, b, x_k, d_k, W_k, atol)
 
-            println("α = $(α), j = $(j) \n")
+            println("α = $(round.(α, sigdigits=4)), j = $(j) \n")
 
             x_k = x_k + min(1, α) .* d_k
 
-            print("Rama 1. ||d_k|| = $(norm(d_k, Inf)), ")
-			print("q(x) = $(x_k' * G * x_k + c' * x_k), α=$(α) ") 
+            print("Rama 1. ||d_k|| = $(round.(norm(d_k, Inf), sigdigits=4)), ")
+			print("q(x) = $(round.(0.5 * x_k' * G * x_k + c' * x_k, sigdigits=4)), ")
+            print("α=$(round.(α, sigdigits=4))")
 
             if α < 1
                 print("k = $(k)")
