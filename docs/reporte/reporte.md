@@ -91,7 +91,45 @@ con el paquete `BenchmarkTools` para evaluar el desempeño de nuestro
 algoritmo y pruebas unitarias para hacer el proceso de desarrollo más 
 fácil.
 
+### Algunos comentarios y aclaraciones
 
+Puesto que no suponemos familiaridad con el lenguaje Julia queremos 
+dar comentarios para hacer más sencilla su interacción con él en caso 
+de que quiera reproducir los resultados mediante los jupyter notebooks 
+provistos.
+
+- Para añadir el kernel de Julia a Jupyter necesita una instalación de 
+  Julia y el paquete `IJulia`. Para desarrollar el proyecto usamos la 
+  versión 1.6.3 de Julia.
+
+- Otros paquetes que usamos son:
+	- `JuMP`
+	- `GLPK`
+	- `MAT`
+	- `BenchmarkTools` (no esencial para probar el algoritmo)
+
+Para evitarle el problema de instalarlos, puede seguir estos pasos:
+
+1. Abrir un Julia REPL escribiendo `julia` en bash.
+2. Escribir `]` para que el prompt cambie de `julia>` a `pkg>`
+3. Escribir `activate .` en el prompt `pkg>`
+
+- Julia es compilado [_just in 
+  time_](https://en.wikipedia.org/wiki/Just-in-time_compilation), por 
+  lo que al iniciarse y la primera vez que se llama una función que no
+  ha sido compilada hay un tiempo de espera considerable. Le 
+  aseguramos que el programa no falló y podrá ver que las llamadas 
+  siguientes son mucho más rápidas.
+
+- Añadimos como apéndices a éste reporte la documentación de los 
+  métodos auxiliares usados en la implementación del algoritmo con la 
+  esperanza de hacerle amena la lectura del código fuente.
+
+- Julia permite usar caracteres unicode como identificadores, que 
+  aprovechamos para hacer más legible nuestro código. Si tiene 
+  problemas con caracteres faltantes o _artifacts_, le pedimos 
+  paciencia y sugerimos usar un emulador de terminal o font diferente.
+  
 # Problemas
 
 Probamos nuestra implementación con tres problemas y presentamos los resultados
@@ -482,43 +520,6 @@ de la frecuencia de tiempos de ejecución.
 \label{fig:histograma}
 \end{figure}
 
-### Algunos comentarios y aclaraciones
 
-Puesto que no suponemos familiaridad con el lenguaje Julia queremos 
-dar comentarios para hacer más sencilla su interacción con él en caso 
-de que quiera reproducir los resultados mediante los jupyter notebooks 
-provistos.
-
-- Para añadir el kernel de Julia a Jupyter necesita una instalación de 
-  Julia y el paquete `IJulia`. Para desarrollar el proyecto usamos la 
-  versión 1.6.3 de Julia.
-
-- Otros paquetes que usamos son:
-	- `JuMP`
-	- `GLPK`
-	- `MAT`
-	- `BenchmarkTools` (no esencial para probar el algoritmo)
-
-Para evitarle el problema de instalarlos, puede seguir estos pasos:
-
-1. Abrir un Julia REPL escribiendo `julia` en bash.
-2. Escribir `]` para que el prompt cambie de `julia>` a `pkg>`
-3. Escribir `activate .` en el prompt `pkg>`
-
-- Julia es compilado [_just in 
-  time_](https://en.wikipedia.org/wiki/Just-in-time_compilation), por 
-  lo que al iniciarse y la primera vez que se llama una función que no
-  ha sido compilada hay un tiempo de espera considerable. Le 
-  aseguramos que el programa no falló y podrá ver que las llamadas 
-  siguientes son mucho más rápidas.
-
-- Añadimos como apéndices a éste reporte la documentación de los 
-  métodos auxiliares usados en la implementación del algoritmo con la 
-  esperanza de hacerle amena la lectura del código fuente.
-
-- Julia permite usar caracteres unicode como identificadores, que 
-  aprovechamos para hacer más legible nuestro código. Si tiene 
-  problemas con caracteres faltantes o _artifacts_, le pedimos 
-  paciencia y sugerimos usar un emulador de terminal o font diferente.
 
 # Referencias
