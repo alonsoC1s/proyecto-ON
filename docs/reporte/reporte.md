@@ -164,7 +164,9 @@ $$
 
 
 
-Sea $n=15$. Aplica el método empezando con $W_{0}$ un subconjunto aleatorio de 5 entradas de los últimos 10 restricciones de positividad.
+Sea $n=15$. Aplica el método empezando con $W_{0}$ un subconjunto 
+aleatorio de 5 entradas de los últimos 10 restricciones de 
+positividad.
 
 Para encontrar $W_{0}$ que cumple las restricciones impuestas usamos el
 siguiente comando:
@@ -298,6 +300,22 @@ ans =
 ```
 
 Nuestra solución coincide con la de [Matlab]{.smallcaps} salvo error de redondeo.
+
+### Comentarios
+
+A primera vista parece que nuestro algoritmo se estanca, ya que en el 
+_output_ presentado se puede notar que $\| d_k \|$ siempre es 
+relativamente grande (alrededor de mil) y que $\alpha = 0$ en todas 
+las iteraciones. Lo cual indica que no se encuentra una dirección 
+factible. Haciendo una inspección más cercana notamos que el conjunto 
+$W_k$ para cada iteración si estaba cambiando, y en cada iteración el 
+algoritmo añadía un índice de manera secuencial. Por lo tanto, 
+concluímos que no es un error de implementación, ya que el algoritmo 
+si está explorando posibles direcciones factibles y añadiendo índices 
+de restricciones a $W_k$ como marca el procedimiento de Conjunto 
+Activo, pero no logra encontrar una dirección de descenso. Lo cual 
+tiene sentido porque notamos que el punto inicial $x_0$ coincide con 
+el mínimo del problema.
 
 ## Problema 3: Problema Afiro
 
