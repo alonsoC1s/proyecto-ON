@@ -91,7 +91,7 @@ con el paquete `BenchmarkTools` para evaluar el desempeño de nuestro
 algoritmo y pruebas unitarias para hacer el proceso de desarrollo más 
 fácil.
 
-### Algunos comentarios y aclaraciones
+## Algunos comentarios y aclaraciones
 
 Puesto que no suponemos familiaridad con el lenguaje Julia queremos 
 dar comentarios para hacer más sencilla su interacción con él en caso 
@@ -341,19 +341,21 @@ Nuestra solución coincide con la de [Matlab]{.smallcaps} salvo error de redonde
 
 ### Comentarios
 
-A primera vista parece que nuestro algoritmo se estanca, ya que en el 
-_output_ presentado se puede notar que $\| d_k \|$ siempre es 
+A primera vista parece que nuestra implementación se estanca, ya que 
+en el _output_ presentado se puede notar que $\| d_k \|$ siempre es 
 relativamente grande (alrededor de mil) y que $\alpha = 0$ en todas 
-las iteraciones. Lo cual indica que no se encuentra una dirección 
+las iteraciones.  Lo cual indica que no se encuentra una dirección 
 factible. Haciendo una inspección más cercana notamos que el conjunto 
 $W_k$ para cada iteración si estaba cambiando, y en cada iteración el 
 algoritmo añadía un índice de manera secuencial. Por lo tanto, 
-concluímos que no es un error de implementación, ya que el algoritmo 
+concluimos que no es un error de implementación, ya que el algoritmo 
 si está explorando posibles direcciones factibles y añadiendo índices 
 de restricciones a $W_k$ como marca el procedimiento de Conjunto 
 Activo, pero no logra encontrar una dirección de descenso. Lo cual 
 tiene sentido porque notamos que el punto inicial $x_0$ coincide con 
-el mínimo del problema.
+el mínimo del problema. El punto inicial lo obtenemos de aplicar la 
+rutina de optimización de problemas lineales de la librería 
+[GLPK]{.smallcaps}
 
 ## Problema 3: Problema Afiro
 
