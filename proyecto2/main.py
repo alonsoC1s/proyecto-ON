@@ -25,7 +25,8 @@ def get_params(
     return C, miu
 
 
-def find_min(f, x0):
+def find_min(f, x0, tol):
+    # TODO: implement
     pass
 
 
@@ -55,10 +56,10 @@ def quadratic_penalty_method(
     ck = next(c_generator)
     for k in range(max_iter):
         # a) Encontrar un mínimo x tal que minimice Qc iniciando en xk
-        def Qc(x): return Q(x, ck)  # TODO: crear la Qc
-        x = find_min(Qc, xk)
+        def Qc(x): return Q(x, ck)
+        x = find_min(Qc, xk, tolk)
         # b) Ver si satisface las
-
+        # TODO: Implement
         # c) si no lo hizo actualizar el costo y demás parámetros
         xk = x
         tolk = next(tol_generator)
@@ -72,7 +73,7 @@ def create_Q(f, h, g):
         gg[gg < 0] = 0
         return f(x) + 0.5*c*np.dot(h(x).T, h(x)) + 0.5*c*np.dot(gg.T, gg)
     return Q
-    
+
 
 def create_problem_1(C, miu, alfa):
     def f(x): return x.T @ C @ x
