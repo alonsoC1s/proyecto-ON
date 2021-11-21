@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def get_params(
     n,
     diag_range=(0.01, 0.4),
