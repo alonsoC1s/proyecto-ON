@@ -3,7 +3,7 @@ from utils import grad, hessian
 import numpy as np
 
 
-def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9, max_iter=1000):
+def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9, max_iter=10000):
     n = len(x0)
     p = len(l0)
     m = len(s0)
@@ -72,7 +72,7 @@ def solve(n, f, h, g, random_state=42):
     Ae = grad(h, x0).T
     Ai = grad(g, x0).T
     # Set gamma 0
-    gamma0 = 1
+    gamma0 = 10
     # Obtain s0 and miu0 that satisfies 4.10d
     m = Ai.shape[0]
     s0 = rnp.rand(m, 1)
