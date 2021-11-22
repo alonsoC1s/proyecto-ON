@@ -38,7 +38,7 @@ def solve_problem(problem_provider, C, mu, params):
         f, h, g = problem_provider(C, mu, param)
         x, _, _ = solve(f, h, g, np.ones((n, 1)))
         print('Solution for param: ', param)
-        print('x:', x)
+        print('x.T:', x.T)
         # print('l:', l)
         # print('miu:', miu)
         print('f(x):', f(x))
@@ -60,7 +60,7 @@ def main():
     solve_problem(create_problem_3, C, mu, gamma_list)
     print('Done.\n')
     # E3d
-    beta_list = [2, 1] # TODO: Justificar con teoría elección de betas
+    beta_list = [2, 1]  # TODO: Justificar con teoría elección de betas
     print('Solving problem 2...')
     solve_problem(create_problem_2, C, mu, beta_list)
     print('Done.\n')
