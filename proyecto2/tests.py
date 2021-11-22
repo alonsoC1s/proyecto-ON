@@ -203,5 +203,6 @@ class ProblemasDeClase(unittest.TestCase):
         print('\nf(sol):', f(sol))
         self.assertTrue(np.all(np.isclose(x, sol, atol=0.001)))
 
+
 if __name__ == '__main__':
     unittest.main()
