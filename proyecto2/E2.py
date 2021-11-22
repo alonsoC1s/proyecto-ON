@@ -3,7 +3,7 @@ from utils import grad, hessian
 import numpy as np
 
 
-def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9, max_iter=10000):
+def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9, max_iter=1000):
     n = len(x0)
     p = len(l0)
     m = len(s0)
@@ -22,7 +22,6 @@ def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9
     def JF(x, l, miu, s, gamma):
         def L(x):
             return f(x) + gamma * np.sum(np.log(s)) + l.T @ h(x) + miu.T @ (g(x) + s)
-
         Lxx = hessian(L, x)
         Ae = grad(h, x).T
         Ai = grad(g, x).T
@@ -47,11 +46,15 @@ def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9
         while norm(Fk(xk, lk, miuk, sk)) > gammak and k < max_iter:
             # Formamos el sistema (4.11)
             # Resolvemos el sistema para obtener dirección de descenso
-            d = np.linalg.solve(JFk(xk, lk, miuk, sk), -Fk(xk, lk, miuk, sk))
+            jloncho, floncho = JFk(xk, lk, miuk, sk), -Fk(xk, lk, miuk, sk)
+            try:
+                d = np.linalg.solve(jloncho, floncho)
+            except Exception as e:
+                d, _, _, _ = np.linalg.lstsq(jloncho, floncho)
             dx, dl, dm, ds = np.split(d, [n, n+p, n+p+m])
             # Calculamos alfas con (4.12)
-            alfa_s = min(1, min(-tau * sk[ds < 0] / ds[ds < 0], default=1))
-            alfa_miu = min(1, min(-tau * miuk[dm < 0] / dm[dm < 0], default=1))
+            alfa_s = float(min(1, min(-tau * sk[ds < 0] / ds[ds < 0], default=1)))
+            alfa_miu = float(min(1, min(-tau * miuk[dm < 0] / dm[dm < 0], default=1)))
             # Calcular nuevos valores
             k += 1
             xk += alfa_s * dx
@@ -64,15 +67,14 @@ def basic_interior_point(f, h, g, x0, s0, l0, miu0, gamma0, sigma, tau, tol=1e-9
     return xk, lk, miuk
 
 
-def solve(n, f, h, g, random_state=42):
+def solve(f, h, g, x0, random_state=42):
     rnp = np.random.RandomState(random_state)
-    x0 = rnp.randn(n, 1)
     # To obtain lambda 0 we need Ae and Ai
     gradf0 = grad(f, x0)
     Ae = grad(h, x0).T
     Ai = grad(g, x0).T
     # Set gamma 0
-    gamma0 = 10
+    gamma0 = 1
     # Obtain s0 and miu0 that satisfies 4.10d
     m = Ai.shape[0]
     s0 = rnp.rand(m, 1)

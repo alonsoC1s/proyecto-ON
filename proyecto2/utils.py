@@ -1,6 +1,16 @@
 import numpy as np
 
 
+def get_greatest_eigenvector(A):
+    w, v = np.linalg.eig(A)
+    return np.array([v[:, w.argmax()]]).T
+
+
+def get_smallest_eigenvector(A):
+    w, v = np.linalg.eig(A)
+    return np.array([v[:, w.argmin()]]).T
+
+
 def e_vector(n, i):
     z = np.zeros((n, 1))
     z[i] = 1
@@ -22,7 +32,6 @@ def grad(f, x):
 
 
 def hessian(f, x):
-    fx = f(x)
     n = len(x)
     dx = (abs(x) + 1) * np.finfo(float).eps ** 0.25
     H = np.zeros((n, n))

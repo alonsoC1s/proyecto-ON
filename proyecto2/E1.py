@@ -9,9 +9,9 @@ def get_params(
     random_state=123
 ):
     """Construye la matriz de covarianzas C y el
-    vector de ganancia esperada de cada activo miu.
+    vector de ganancia esperada de cada activo mu.
     Input: n
-    Output: C, miu
+    Output: C, mu
     """
     rnp = np.random.RandomState(random_state)
     # Generate C
