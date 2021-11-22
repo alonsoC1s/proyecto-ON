@@ -15,7 +15,7 @@ def create_problem_1(C, miu, alfa):
 
 
 def create_problem_2(C, miu, beta):
-    def f(x): return miu.T @ x
+    def f(x): return -miu.T @ x
     def h(x): return np.ones(x.shape).T @ x - 1
 
     def g(x):
@@ -37,33 +37,38 @@ def solve_problem(problem_provider, C, mu, params):
     for param in params:
         f, h, g = problem_provider(C, mu, param)
         x, _, _ = solve(f, h, g, np.ones((n, 1)))
-        print('Solution for param: ', param)
-        print('x.T:', x.T)
+        print('\nSolution for param: ', param)
+        print('Solución (x.T):', x.T)
         # print('l:', l)
         # print('miu:', miu)
-        print('f(x):', f(x))
-        print('')
+        # print('f(x):', f(x))
+        print('Ganancia (x.T@mu):', x.T @ mu)
+        print('Varianza (x.T @ C @ x):', x.T @ C @ x)
 
 
 def main():
     # E3a
     n = 10
     C, mu = get_params(n)
+    print('C:', C)
+    print('mu.T:', mu.T)
     # E3b
     alfa_list = [np.min(mu), np.mean(mu)]
-    print('Solving problem 1...')
+    print('\nSolving problem 1...')
     solve_problem(create_problem_1, C, mu, alfa_list)
-    print('Done.\n')
+    print('Done.')
     # E3c
     gamma_list = [1, 10, 100]
-    print('Solving problem 3...')
+    print('\nSolving problem 3...')
     solve_problem(create_problem_3, C, mu, gamma_list)
-    print('Done.\n')
+    print('Done.')
     # E3d
-    beta_list = [2, 1]  # TODO: Justificar con teoría elección de betas
-    print('Solving problem 2...')
+    # Si beta es cualquier elemento de la diagonal, entonces
+    # el vector canonico ei es factible y por lo tanto el conjunto factible != vacío
+    beta_list = [np.diag(C).min(), np.diag(C).max()]
+    print('\nSolving problem 2...')
     solve_problem(create_problem_2, C, mu, beta_list)
-    print('Done.\n')
+    print('Done.')
 
 
 if __name__ == '__main__':
